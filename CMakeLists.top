@@ -1,0 +1,4 @@
+cmake_minimum_required(VERSION 3.11)
+include(tp_build/cmake/build.cmake)
+tp_parse_submodules()
+
