@@ -12,6 +12,9 @@ SOURCES += src/Cache.cpp
 HEADERS += inc/general_configurator/UpdateCache.h
 SOURCES += src/UpdateCache.cpp
 
+HEADERS += inc/general_configurator/Generate.h
+SOURCES += src/Generate.cpp
+
 HEADERS += inc/general_configurator/MainWindow.h
 SOURCES += src/MainWindow.cpp
 

@@ -1,6 +1,7 @@
 #include "general_configurator/MainWindow.h"
 #include "general_configurator/UpdateCache.h"
 #include "general_configurator/Cache.h"
+#include "general_configurator/Generate.h"
 
 #include "tp_qt_widgets/BlockingOperationDialog.h"
 #include "tp_qt_widgets/FileDialogLineEdit.h"
@@ -71,7 +72,7 @@ struct MainWindow::Private
     libraries->clear();
     for(const auto& module : cache->modules())
     {
-      if(module.type == "lib")
+      if(module.type == "lib" || module.type == "subdirs" )
       {
         auto item = new QListWidgetItem(QString::fromStdString(module.name.toString()));
         item->setCheckState(Qt::Unchecked);
@@ -135,21 +136,28 @@ struct MainWindow::Private
   {
     QSettings().setValue("rootPath", rootPath->text());
 
-    std::string moduleName = modulePrefix->text().toStdString() + '_' + moduleSuffix->text().toStdString();
+    std::string rootPath     = this->rootPath->text().toStdString();
+    std::string modulePrefix = this->modulePrefix->text().toStdString();
+    std::string moduleSuffix = this->moduleSuffix->text().toStdString();
 
-    {
-      std::string appPathString = rootPath->text().toStdString();
-      appPathString = tp_utils::pathAppend(appPathString, modulePrefix->text().toStdString());
-      appPathString = tp_utils::pathAppend(appPathString, moduleSuffix->text().toStdString());
-      appPathString = tp_utils::pathAppend(appPathString, moduleName);
-      appPath->setText(QString::fromStdString(appPathString));
-    }
+    std::string appPathString = generateAppPathString(rootPath,
+                                                      modulePrefix,
+                                                      moduleSuffix);
 
-    {
-      std::string gitRepoString = appTemplateModule.gitRepoPrefix;
-      gitRepoString += moduleName + ".git";
-      gitRepo->setText(QString::fromStdString(gitRepoString));
-    }
+    std::string gitRepoString = generateGitRepoString(appTemplateModule.gitRepoPrefix,
+                                                      modulePrefix,
+                                                      moduleSuffix);
+
+    appPath->setText(QString::fromStdString(appPathString));
+    gitRepo->setText(QString::fromStdString(gitRepoString));
+  }
+
+  //################################################################################################
+  tp_utils::StringID appTemplateName()
+  {
+    if(auto i = appTemplates->selectedItems(); !i.empty())
+      return i.front()->text().toStdString();
+    return tp_utils::StringID();
   }
 
   //################################################################################################
@@ -157,11 +165,7 @@ struct MainWindow::Private
   {
     resetLibraries();
 
-    tp_utils::StringID appTemplateName;
-    if(auto i = appTemplates->selectedItems(); !i.empty())
-      appTemplateName = i.front()->text().toStdString();
-
-    appTemplateModule = cache->module(appTemplateName);
+    appTemplateModule = cache->module(appTemplateName());
 
     for(const auto& dependency : appTemplateModule.dependencies)
       checkLibrary(dependency, false, true);
@@ -414,6 +418,21 @@ MainWindow::MainWindow(Cache* cache):
 
     auto generateButton = new QPushButton("Generate");
     l->addWidget(generateButton, 0, Qt::AlignLeft);
+
+    connect(generateButton, &QPushButton::clicked, this, [&]
+    {
+      tp_qt_widgets::BlockingOperationDialog::exec(d->poll, "Updating the cache", this, [&](tp_utils::Progress* progress)
+      {
+        return generateApp(*d->cache,
+                           d->appTemplateName(),
+                           d->rootPath->text().toStdString(),
+                           d->modulePrefix->text().toStdString(),
+                           d->moduleSuffix->text().toStdString(),
+                           d->selectedLibraries(),
+                           d->allDependencies(),
+                           progress);
+      });
+    });
 
     l->addStretch();
   }

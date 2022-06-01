@@ -10,17 +10,6 @@
 
 namespace general_configurator
 {
-class Cache;
-
-namespace
-{
-//##################################################################################################
-int runCommand(const std::string& workingDirectory, const std::string& command)
-{
-  std::string s = "cd " + workingDirectory + " && " + command;
-  return std::system(s.c_str());
-}
-}
 
 //##################################################################################################
 bool updateCache(Cache& cache, tp_utils::Progress* progress)
@@ -94,8 +83,10 @@ bool updateCache(Cache& cache, tp_utils::Progress* progress)
       {
         tp_utils::rm(tmpFile, false);
         runCommand(path, "git config --get remote.origin.url > " + tmpFile);
-        module.gitRepoPrefix = tp_utils::readTextFile(tmpFile);
-        module.gitRepoPrefix.erase(std::remove_if(module.gitRepoPrefix.begin(), module.gitRepoPrefix.end(), isspace), module.gitRepoPrefix.end());
+
+        module.gitRepoURL = tp_utils::readTextFile(tmpFile);
+        module.gitRepoURL.erase(std::remove_if(module.gitRepoURL.begin(), module.gitRepoURL.end(), isspace), module.gitRepoURL.end());
+        module.gitRepoPrefix = module.gitRepoURL;
 
         auto i = module.gitRepoPrefix.rfind(moduleName);
         if(i<module.gitRepoPrefix.size())
