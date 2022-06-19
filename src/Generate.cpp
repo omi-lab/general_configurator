@@ -138,6 +138,7 @@ bool generateApp(const Cache& cache,
     progress->addMessage("Generate submodules.");
 
     std::string submodules;
+    submodules += "\nTEMPLATE = subdirs\n";
 
     for(const auto& m : allDependencies)
       submodules += "SUBDIRS += " + m.toString() + "\n";
