@@ -34,7 +34,16 @@ public:
   const std::vector<Module>& modules() const;
 
   //################################################################################################
-  Module module(const tp_utils::StringID& name) const;
+  Module module(const tp_utils::StringID& name) const;  
+
+  //################################################################################################
+  bool isDependency(const tp_utils::StringID& name, const tp_utils::StringID& of) const;
+
+  //################################################################################################
+  void sortModules(std::vector<Module>& modules) const;
+
+  //################################################################################################
+  std::vector<tp_utils::StringID> sortDependencies(const std::unordered_set<tp_utils::StringID>& dependencies) const;
 
   //################################################################################################
   tp_utils::CallbackCollection<void()> changed;

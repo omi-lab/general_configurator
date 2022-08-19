@@ -67,6 +67,14 @@ struct MainWindow::Private
   }
 
   //################################################################################################
+  void sortCacheClicked()
+  {
+    auto modules = cache->modules();
+    cache->sortModules(modules);
+    cache->setModules(modules);
+  }
+
+  //################################################################################################
   void resetLibraries()
   {
     libraries->clear();
@@ -307,6 +315,10 @@ MainWindow::MainWindow(Cache* cache):
     auto updateCacheButton = new QPushButton("Update cache");
     l->addWidget(updateCacheButton);
     connect(updateCacheButton, &QPushButton::clicked, this, [&]{d->updateCacheClicked();});
+
+    auto sortCacheButton = new QPushButton("Sort cache");
+    l->addWidget(sortCacheButton);
+    connect(sortCacheButton, &QPushButton::clicked, this, [&]{d->sortCacheClicked();});
   }
 
   {

@@ -7,14 +7,20 @@ namespace general_configurator
 {
 
 //##################################################################################################
-std::string Module::prefix() const
+std::string extractPrefix(const std::string& name)
 {
   std::vector<std::string> parts;
-  tpSplit(parts, name.toString(), '_');
+  tpSplit(parts, name, '_');
   if(!parts.empty())
     return parts.front();
 
   return {};
+}
+
+//##################################################################################################
+std::string Module::prefix() const
+{
+  return extractPrefix(name.toString());
 }
 
 //##################################################################################################

@@ -1,7 +1,6 @@
 #include "general_configurator/UpdateCache.h"
 #include "general_configurator/Cache.h"
 
-#include "tp_utils/DebugUtils.h"
 #include "tp_utils/Progress.h"
 #include "tp_utils/FileUtils.h"
 
@@ -131,6 +130,7 @@ bool updateCache(Cache& cache, tp_utils::Progress* progress)
       p->setProgress(f);
     }
 
+    cache.sortModules(modules);
     cache.setModules(modules);
   }
 

@@ -60,7 +60,7 @@ bool generateApp(const Cache& cache,
     progress->setProgress(0.2f);
   }
 
-  //-- Clone the template into the module directory ------------------------------------------------
+  //-- Delete the .git directory -------------------------------------------------------------------
   {
     std::string gitDir = tp_utils::pathAppend(appPathString, ".git");
     progress->addMessage("Delete .git directory: " + gitDir);
@@ -139,10 +139,20 @@ bool generateApp(const Cache& cache,
 
     std::string submodules;
 
-    for(const auto& m : allDependencies)
-      submodules += "SUBDIRS += " + m.toString() + "\n";
+    std::string previousPrefix;
 
-    submodules += "SUBDIRS += " + moduleName + "\n";
+    for(const auto& m : cache.sortDependencies(allDependencies))
+    {
+      std::string prefix = extractPrefix(m.toString());
+      if(!previousPrefix.empty() && previousPrefix != prefix)
+        submodules += "\n";
+      previousPrefix.swap(prefix);
+
+      submodules += "SUBDIRS += " + m.toString() + "\n";
+    }
+
+    submodules += "\n";
+    submodules += "SUBDIRS += " + moduleName + "\n\n";
 
     std::string submodulesFile = tp_utils::pathAppend(appPathString, "submodules.pri");
     tp_utils::writeTextFile(submodulesFile, submodules);

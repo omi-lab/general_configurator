@@ -121,4 +121,92 @@ Module Cache::module(const tp_utils::StringID& name) const
   return {};
 }
 
+//##################################################################################################
+bool Cache::isDependency(const tp_utils::StringID& name, const tp_utils::StringID& of) const
+{
+  std::vector<tp_utils::StringID> deps;
+  deps.push_back(of);
+
+  for(size_t i=0; i<deps.size(); i++)
+  {
+    auto m = module(deps.at(i));
+
+    if(m.name == name)
+      return true;
+
+    for(const auto& dep : m.dependencies)
+      if(!tpContains(deps, dep))
+        deps.push_back(dep);
+  }
+
+  return false;
+}
+
+//##################################################################################################
+void Cache::sortModules(std::vector<Module>& modules) const
+{
+  auto sordDeps = [&]
+  {
+    for(;;)
+    {
+      bool changed=false;
+
+      for(size_t i=1; i<modules.size(); i++)
+      {
+        for(size_t j=i-1; j<modules.size(); j--)
+        {
+          if(isDependency(modules[i].name, modules[j].name))
+          {
+            std::swap(modules[i-1], modules[i]);
+            changed = true;
+            break;
+          }
+        }
+      }
+
+      if(!changed)
+        break;
+    }
+  };
+
+  sordDeps();
+
+  std::vector<std::string> prefixes;
+  for(const auto& m : modules)
+    if(auto p=m.prefix(); !tpContains(prefixes, p))
+      prefixes.push_back(p);
+
+  std::vector<Module> modulesOld;
+  modulesOld.swap(modules);
+  modules.reserve(modulesOld.size());
+  for(const auto& p : prefixes)
+    for(const auto& m : modulesOld)
+      if(m.prefix() == p)
+        modules.push_back(m);
+
+  sordDeps();
+}
+
+//##################################################################################################
+std::vector<tp_utils::StringID> Cache::sortDependencies(const std::unordered_set<tp_utils::StringID>& dependencies) const
+{
+  std::unordered_set<tp_utils::StringID> deps = dependencies;
+  std::vector<tp_utils::StringID> result;
+  result.reserve(deps.size());
+
+  for(const auto& m : d->modules)
+  {
+    if(auto i=deps.find(m.name); i!=deps.end())
+    {
+      result.push_back(m.name);
+      deps.erase(i);
+    }
+  }
+
+  for(const auto& dep : deps)
+    result.push_back(dep);
+
+  return result;
+}
+
 }
