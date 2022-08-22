@@ -10,6 +10,32 @@
 namespace general_configurator
 {
 
+namespace
+{
+
+//##################################################################################################
+auto parsePRI = [](const std::string& path, const auto& closure)
+{
+  std::string  data = tp_utils::readTextFile(path);
+  std::vector<std::string> lines;
+  tpSplit(lines, data, '\n');
+
+  for(auto line : lines)
+  {
+    line.erase(std::remove_if(line.begin(), line.end(), [](auto c)
+    {
+      return isspace(c) || c=='+';
+    }), line.end());
+
+    std::vector<std::string> parts;
+    tpSplit(parts, line, '=', tp_utils::SplitBehavior::SkipEmptyParts);
+    if(parts.size() == 2)
+      closure(parts);
+  }
+};
+
+}
+
 //##################################################################################################
 bool updateCache(Cache& cache, tp_utils::Progress* progress)
 {
@@ -76,6 +102,11 @@ bool updateCache(Cache& cache, tp_utils::Progress* progress)
       auto moduleName = tp_utils::filename(path);
       p->addMessage("Reading dependencies of: " + moduleName);
 
+      auto filePath = [&](const std::string& filename)
+      {
+        return tp_utils::pathAppend(path, filename);
+      };
+
       Module& module = modules.emplace_back();
       module.name = moduleName;
 
@@ -94,33 +125,13 @@ bool updateCache(Cache& cache, tp_utils::Progress* progress)
         tp_utils::rm(tmpFile, false);
       }
 
-      auto parsePRI = [&](const std::string& filename, const auto& closure)
-      {
-        std::string  data = tp_utils::readTextFile(tp_utils::pathAppend(path, filename));
-        std::vector<std::string> lines;
-        tpSplit(lines, data, '\n');
-
-        for(auto line : lines)
-        {
-          line.erase(std::remove_if(line.begin(), line.end(), [](auto c)
-          {
-            return isspace(c) || c=='+';
-          }), line.end());
-
-          std::vector<std::string> parts;
-          tpSplit(parts, line, '=', tp_utils::SplitBehavior::SkipEmptyParts);
-          if(parts.size() == 2)
-            closure(parts);
-        }
-      };
-
-      parsePRI("dependencies.pri", [&](const auto& parts)
+      parsePRI(filePath("dependencies.pri"), [&](const auto& parts)
       {
         if(parts.front() == "DEPENDENCIES")
           module.dependencies.insert(parts.at(1));
       });
 
-      parsePRI("vars.pri", [&](const auto& parts)
+      parsePRI(filePath("vars.pri"), [&](const auto& parts)
       {
         if(parts.front() == "TEMPLATE")
           module.type = parts.at(1);
@@ -135,6 +146,20 @@ bool updateCache(Cache& cache, tp_utils::Progress* progress)
   }
 
   return true;
+}
+
+//##################################################################################################
+std::unordered_set<tp_utils::StringID> parseSubmodules(const std::string& path)
+{
+  std::unordered_set<tp_utils::StringID> subdirs;
+
+  parsePRI(path, [&](const auto& parts)
+  {
+    if(parts.front() == "SUBDIRS")
+      subdirs.insert(parts.at(1));
+  });
+
+  return subdirs;
 }
 
 }

@@ -15,6 +15,9 @@ class Cache;
 //##################################################################################################
 bool updateCache(Cache& cache, tp_utils::Progress* progress);
 
+//##################################################################################################
+std::unordered_set<tp_utils::StringID> parseSubmodules(const std::string& path);
+
 }
 
 #endif

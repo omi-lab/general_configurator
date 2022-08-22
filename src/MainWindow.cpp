@@ -6,7 +6,7 @@
 #include "tp_qt_widgets/BlockingOperationDialog.h"
 #include "tp_qt_widgets/FileDialogLineEdit.h"
 
-#include "tp_utils/DebugUtils.h"
+#include "tp_utils/RefCount.h"
 #include "tp_utils/FileUtils.h"
 
 #include <QGridLayout>
@@ -18,6 +18,7 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <QApplication>
+#include <QFileDialog>
 #include <QSettings>
 
 namespace general_configurator
@@ -72,6 +73,26 @@ struct MainWindow::Private
     auto modules = cache->modules();
     cache->sortModules(modules);
     cache->setModules(modules);
+  }
+
+  //################################################################################################
+  void sortSubmodulesClicked()
+  {
+    auto dir = rootPath->text();
+
+    auto path = QFileDialog::getOpenFileName(q, "Select submodules.pri", dir, "submodules.pri").toStdString();
+    if(path.empty())
+      return;
+
+    auto subdirs = parseSubmodules(path);
+    if(subdirs.empty())
+      return;
+
+    std::string submodules = generateSubmodules(*cache, std::string(), subdirs);
+    if(submodules.empty())
+      return;
+
+    tp_utils::writeTextFile(path, submodules);
   }
 
   //################################################################################################
@@ -312,13 +333,23 @@ MainWindow::MainWindow(Cache* cache):
     d->sourceRepos = new QPlainTextEdit();
     l->addWidget(d->sourceRepos);
 
-    auto updateCacheButton = new QPushButton("Update cache");
-    l->addWidget(updateCacheButton);
-    connect(updateCacheButton, &QPushButton::clicked, this, [&]{d->updateCacheClicked();});
+    {
+      auto button = new QPushButton("Update cache");
+      l->addWidget(button);
+      connect(button, &QPushButton::clicked, this, [&]{d->updateCacheClicked();});
+    }
 
-    auto sortCacheButton = new QPushButton("Sort cache");
-    l->addWidget(sortCacheButton);
-    connect(sortCacheButton, &QPushButton::clicked, this, [&]{d->sortCacheClicked();});
+    {
+      auto button = new QPushButton("Sort cache");
+      l->addWidget(button);
+      connect(button, &QPushButton::clicked, this, [&]{d->sortCacheClicked();});
+    }
+
+    {
+      auto button = new QPushButton("Sort existing submodules.pri");
+      l->addWidget(button);
+      connect(button, &QPushButton::clicked, this, [&]{d->sortSubmodulesClicked();});
+    }
   }
 
   {

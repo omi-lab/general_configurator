@@ -137,23 +137,7 @@ bool generateApp(const Cache& cache,
   {
     progress->addMessage("Generate submodules.");
 
-    std::string submodules;
-
-    std::string previousPrefix;
-
-    for(const auto& m : cache.sortDependencies(allDependencies))
-    {
-      std::string prefix = extractPrefix(m.toString());
-      if(!previousPrefix.empty() && previousPrefix != prefix)
-        submodules += "\n";
-      previousPrefix.swap(prefix);
-
-      submodules += "SUBDIRS += " + m.toString() + "\n";
-    }
-
-    submodules += "\n";
-    submodules += "SUBDIRS += " + moduleName + "\n\n";
-
+    std::string submodules = generateSubmodules(cache, moduleName, allDependencies);
     std::string submodulesFile = tp_utils::pathAppend(appPathString, "submodules.pri");
     tp_utils::writeTextFile(submodulesFile, submodules);
 
@@ -238,4 +222,29 @@ bool generateApp(const Cache& cache,
   return true;
 }
 
+//##################################################################################################
+std::string generateSubmodules(const Cache& cache,
+                               const std::string& moduleName,
+                               const std::unordered_set<tp_utils::StringID>& allDependencies)
+{
+  std::string submodules;
+  std::string previousPrefix;
+
+  for(const auto& m : cache.sortDependencies(allDependencies))
+  {
+    std::string prefix = extractPrefix(m.toString());
+    if(!previousPrefix.empty() && previousPrefix != prefix)
+      submodules += "\n";
+    previousPrefix.swap(prefix);
+
+    submodules += "SUBDIRS += " + m.toString() + "\n";
+  }
+
+  submodules += "\n";
+
+  if(!moduleName.empty())
+    submodules += "SUBDIRS += " + moduleName + "\n\n";
+
+  return submodules;
+}
 }

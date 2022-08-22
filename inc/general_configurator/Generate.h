@@ -22,6 +22,12 @@ bool generateApp(const Cache& cache,
                  const std::unordered_set<tp_utils::StringID>& allDependencies,
                  tp_utils::Progress* progress);
 
+//##################################################################################################
+std::string generateSubmodules(const Cache& cache,
+                               const std::string& moduleName,
+                               const std::unordered_set<tp_utils::StringID>& allDependencies);
+
+
 }
 
 #endif
