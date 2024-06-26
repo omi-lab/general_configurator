@@ -58,7 +58,7 @@ struct MainWindow::Private
   void updateCacheClicked()
   {
     std::vector<std::string> s;
-    tpSplit(s, sourceRepos->toPlainText().toStdString(), '\n', tp_utils::SplitBehavior::SkipEmptyParts);
+    tpSplit(s, sourceRepos->toPlainText().toStdString(), '\n', TPSplitBehavior::SkipEmptyParts);
     cache->setSourceRepos(s);
 
     tp_qt_widgets::BlockingOperationDialog::exec(poll, "Updating the cache", q, [&](tp_utils::Progress* progress)

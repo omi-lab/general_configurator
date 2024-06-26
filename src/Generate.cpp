@@ -38,7 +38,7 @@ bool generateApp(const Cache& cache,
   //-- Create the module directory -----------------------------------------------------------------
   {
     progress->addMessage("Create app module path: " + appPathString);
-    if(!tp_utils::mkdir(appPathString, tp_utils::CreateFullPath::Yes))
+    if(!tp_utils::mkdir(appPathString, TPCreateFullPath::Yes))
     {
       progress->addError("Failed to create module directory!");
       return false;
@@ -64,7 +64,7 @@ bool generateApp(const Cache& cache,
   {
     std::string gitDir = tp_utils::pathAppend(appPathString, ".git");
     progress->addMessage("Delete .git directory: " + gitDir);
-    if(!tp_utils::rm(gitDir, true))
+    if(!tp_utils::rm(gitDir, TPRecursive::Yes))
     {
       progress->addError("Failed to delete .git directory!");
       return false;

@@ -28,7 +28,7 @@ auto parsePRI = [](const std::string& path, const auto& closure)
     }), line.end());
 
     std::vector<std::string> parts;
-    tpSplit(parts, line, '=', tp_utils::SplitBehavior::SkipEmptyParts);
+    tpSplit(parts, line, '=', TPSplitBehavior::SkipEmptyParts);
     if(parts.size() == 2)
       closure(parts);
   }
@@ -44,8 +44,8 @@ bool updateCache(Cache& cache, tp_utils::Progress* progress)
 
   {
     auto p = progress->addChildStep("Deleting existing repos", 0.1f);
-    tp_utils::rm(reposDirectory, true);
-    tp_utils::mkdir(reposDirectory, tp_utils::CreateFullPath::Yes);
+    tp_utils::rm(reposDirectory, TPRecursive::Yes);
+    tp_utils::mkdir(reposDirectory, TPCreateFullPath::Yes);
     p->addMessage("Done");
     p->setProgress(1.0f);
   }
@@ -111,7 +111,7 @@ bool updateCache(Cache& cache, tp_utils::Progress* progress)
       module.name = moduleName;
 
       {
-        tp_utils::rm(tmpFile, false);
+        tp_utils::rm(tmpFile, TPRecursive::Yes);
         runCommand(path, "git config --get remote.origin.url > " + tmpFile);
 
         module.gitRepoURL = tp_utils::readTextFile(tmpFile);
@@ -122,7 +122,7 @@ bool updateCache(Cache& cache, tp_utils::Progress* progress)
         if(i<module.gitRepoPrefix.size())
           module.gitRepoPrefix = module.gitRepoPrefix.substr(0, i);
 
-        tp_utils::rm(tmpFile, false);
+        tp_utils::rm(tmpFile, TPRecursive::No);
       }
 
       parsePRI(filePath("dependencies.pri"), [&](const auto& parts)

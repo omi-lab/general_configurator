@@ -22,7 +22,7 @@ struct Cache::Private
     q(q_),
     cacheDirectory(cacheDirectory_)
   {
-    tp_utils::mkdir(cacheDirectory, tp_utils::CreateFullPath::Yes);
+    tp_utils::mkdir(cacheDirectory, TPCreateFullPath::Yes);
   }
 
   //################################################################################################
