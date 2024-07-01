@@ -72,7 +72,7 @@ void Module::loadState(const nlohmann::json& j)
   if(auto i=j.find("dependencies"); i!=j.end() && i->is_array())
     for(const auto& jj : *i)
       if(jj.is_string())
-        dependencies.insert(std::string(jj));
+        dependencies.insert(jj.get<std::string>());
 }
 
 //##################################################################################################
