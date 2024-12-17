@@ -11,6 +11,7 @@ namespace general_configurator
 //##################################################################################################
 class Cache
 {
+  TP_DQ;
 public:
   //################################################################################################
   Cache(const std::string& cacheDirectory);
@@ -47,11 +48,6 @@ public:
 
   //################################################################################################
   tp_utils::CallbackCollection<void()> changed;
-
-private:
-  struct Private;
-  friend struct Private;
-  Private* d;
 };
 
 }

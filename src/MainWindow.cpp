@@ -30,7 +30,7 @@ struct MainWindow::Private
   TP_REF_COUNT_OBJECTS("general_configurator::MainWindow::Private");
   TP_NONCOPYABLE(Private);
 
-  MainWindow* q;
+  Q* q;
   Cache* cache;
 
   QPlainTextEdit* sourceRepos{nullptr};
@@ -47,7 +47,7 @@ struct MainWindow::Private
   Module appTemplateModule;
 
   //################################################################################################
-  Private(MainWindow* q_, Cache* cache_):
+  Private(Q* q_, Cache* cache_):
     q(q_),
     cache(cache_)
   {

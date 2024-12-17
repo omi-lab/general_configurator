@@ -11,14 +11,14 @@ namespace general_configurator
 //##################################################################################################
 struct Cache::Private
 {
-  Cache* q;
+  Q* q;
   const std::string cacheDirectory;
 
   std::vector<std::string> sourceRepos;
   std::vector<Module> modules;
 
   //################################################################################################
-  Private(Cache* q_, const std::string& cacheDirectory_):
+  Private(Q* q_, const std::string& cacheDirectory_):
     q(q_),
     cacheDirectory(cacheDirectory_)
   {
