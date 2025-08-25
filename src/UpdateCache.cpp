@@ -46,8 +46,7 @@ bool updateCache(Cache& cache, tp_utils::Progress* progress)
     auto p = progress->addChildStep("Deleting existing repos", 0.1f);
     tp_utils::rm(reposDirectory, TPRecursive::Yes);
     tp_utils::mkdir(reposDirectory, TPCreateFullPath::Yes);
-    p->addMessage("Done");
-    p->setProgress(1.0f);
+    p->setProgress(1.0f, "Done.");
   }
 
   {
@@ -82,8 +81,7 @@ bool updateCache(Cache& cache, tp_utils::Progress* progress)
       return false;
     }
 
-    p->addMessage("Done");
-    p->setProgress(1.0f);
+    p->setProgress(1.0f, "Done.");
   }
 
   {
